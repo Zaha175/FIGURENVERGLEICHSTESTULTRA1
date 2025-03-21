@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbolvergleichsspiel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to bottom, #e6f2ff, #cce0ff);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #000080;
+            font-weight: bold;
+            font-size: 2.5em;
+        }
+
+        #taskNumber {
+            margin-bottom: 10px;
+        }
+
+        .top-shapes-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+            max-width: 660px;
+        }
+
+        .bottom-shapes-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .shape-box {
+            width: 110px;
+            height: 110px;
+            border: 3px solid #000080;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffcc;
+            font-size: 52px;
+            border-radius: 10px;
+            flex-basis: auto;
+            position: relative;
+            transition: transform 0.5s ease, background-color 0.3s ease;
+        }
+
+        .bottom-shapes-container .shape-box {
+            width: 110px;
+        }
+
+        .special-symbol {
+            position: absolute;
+            bottom: 5px;
+            font-size: 20px;
+            color: red;
+            animation: blink 1s infinite;
+        }
+
+        /* Einflieganimation für obere Symbole */
+        .top-shape {
+            animation: slideInFromLeft 0.5s ease forwards;
+        }
+
+        /* Einflieganimation für untere Symbole */
+        .bottom-shape {
+            animation: slideInFromRight 0.5s ease forwards;
+        }
+
+        /* Pulsieranimation für Symbole */
+        .shape-box {
+            animation: pulse 2s infinite;
+        }
+
+        /* Feedback-Animation für richtige/falsche Antwort */
+        .correct {
+            background-color: #90ee90 !important; /* Hellgrün */
+            animation: flash 0.3s;
+        }
+
+        .incorrect {
+            background-color: #ff6347 !important; /* Hellrot */
+            animation: flash 0.3s;
+        }
+
+        @keyframes slideInFromLeft {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInFromRight {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes flash {
+            0% {
+                background-color: #ffffcc;
+            }
+            50% {
+                background-color: inherit;
+            }
+            100% {
+                background-color: #ffffcc;
+            }
+        }
+
+        .instruction {
+            margin: 20px auto;
+            font-size: 16px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .buttons {
+            margin-top: 10px;
+        }
+
+        .buttons button {
+            width: 70px;
+            height: 70px;
+            margin: 0 25px;
+            font-size: 0;
+            border: 2px solid #000;
+            cursor: pointer;
+            outline: none;
+            border-radius: 50%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .buttons button:hover {
+            transform: scale(1.1);
+        }
+
+        .green-button {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230f0'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+        }
+
+        .red-button {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f00'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 20px;
+            border: 3px solid #000080;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
+        }
+
+        #restartButton {
+            display: none;
+            margin-top: 20px;
+            font-size: 14px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #startScreen {
+            margin-top: 20px;
+        }
+
+        #testContainer {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Symbolvergleichsspiel</h1>
+
+    <div id="startScreen">
+        <p>Bitte wählen Sie die Anzahl der Aufgaben:</p>
+        <label><input type="radio" name="taskCount" value="10" checked> 10 Aufgaben</label>
+        <label><input type="radio" name="taskCount" value="20"> 20 Aufgaben</label>
+        <label><input type="radio" name="taskCount" value="30"> 30 Aufgaben</label>
+        <label><input type="radio" name="taskCount" value="40"> 40 Aufgaben</label>
+        <br><br>
+        <button id="startButton">Start</button>
+    </div>
+
+    <div id="testContainer">
+        <div id="taskNumber"></div>
+
+        <div class="top-shapes-container" id="topRow"></div>
+
+        <div class="bottom-shapes-container" id="bottomRow"></div>
+
+        <div class="instruction">
+            Klicken Sie bei Übereinstimmung den grünen Button an!<br>
+            Im anderen Fall klicken Sie den roten Button an!<br>
+            Achtung: Wenn das untere Symbol === (drei Balken) ist und === oben vorkommt, ist die Antwort normalerweise Ja (grün). Aber wenn das Sonderzeichen >= unter dem === oben erscheint, ist die Antwort Nein (rot)!
+        </div>
+
+        <div class="buttons">
+            <button id="yesButton" class="green-button"><span>Ja</span></button>
+            <button id="noButton" class="red-button"><span>Nein</span></button>
+        </div>
+
+        <hr style="margin-top: 20px; width: 80%;">
+
+        <div id="result"></div>
+        <button id="restartButton">NEU STARTEN?</button>
+    </div>
+
+    <script>
+        // Symbolpool basierend auf dem Bild
+        const symbolPool = ['*', '||', '===', '+', '[]'];
+        const specialSymbol = '>='; // Das Sonderzeichen
+        const threeLinesSymbol = '==='; // Symbol mit drei Balken
+
+        // Globale Variablen
+        let tasks = [];
+        let currentTaskIndex = 0;
+        let results = [];
+        let startTime = null;
+        let totalTasks = 10;
+
+        document.getElementById('startButton').addEventListener('click', startTest);
+
+        function startTest() {
+            const radios = document.getElementsByName('taskCount');
+            for (const r of radios) {
+                if (r.checked) {
+                    totalTasks = parseInt(r.value);
+                    break;
+                }
+            }
+
+            tasks = generateTasks(totalTasks);
+
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('testContainer').style.display = 'flex';
+
+            currentTaskIndex = 0;
+            results = [];
+            showTask(currentTaskIndex);
+        }
+
+        function generateTasks(count) {
+            const generatedTasks = [];
+            for (let i = 0; i < count; i++) {
+                let topShapes = [];
+                while (topShapes.length < 5) {
+                    const sym = symbolPool[Math.floor(Math.random() * symbolPool.length)];
+                    if (!topShapes.includes(sym)) {
+                        topShapes.push(sym);
+                    }
+                }
+                const bottomShape = symbolPool[Math.floor(Math.random() * symbolPool.length)];
+                const specialSymbolPosition = Math.floor(Math.random() * 5);
+                generatedTasks.push({ topShapes, bottomShapes: [bottomShape], specialSymbolPosition });
+            }
+            return generatedTasks;
+        }
+
+        function showTask(index) {
+            const task = tasks[index];
+
+            document.getElementById('taskNumber').textContent = `Aufgabe ${index + 1} von ${tasks.length}`;
+
+            const topRow = document.getElementById('topRow');
+            topRow.innerHTML = '';
+
+            task.topShapes.forEach((shape, i) => {
+                const el = document.createElement('div');
+                el.className = 'shape-box top-shape';
+                el.textContent = shape;
+                if (i === task.specialSymbolPosition) {
+                    const specialEl = document.createElement('div');
+                    specialEl.className = 'special-symbol';
+                    specialEl.textContent = specialSymbol;
+                    el.appendChild(specialEl);
+                }
+                topRow.appendChild(el);
+            });
+
+            const bottomRow = document.getElementById('bottomRow');
+            bottomRow.innerHTML = '';
+            task.bottomShapes.forEach(shape => {
+                const el = document.createElement('div');
+                el.className = 'shape-box bottom-shape';
+                el.textContent = shape;
+                bottomRow.appendChild(el);
+            });
+
+            startTime = Date.now();
+        }
+
+        function nextTask() {
+            currentTaskIndex++;
+            if (currentTaskIndex < tasks.length) {
+                showTask(currentTaskIndex);
+            } else {
+                showResults();
+            }
+        }
+
+        function evaluateAnswer(userSaysYes) {
+            const endTime = Date.now();
+            const task = tasks[currentTaskIndex];
+
+            // Prüfen, ob das untere Symbol in den oberen Symbolen vorkommt
+            let correct = task.topShapes.includes(task.bottomShapes[0]);
+
+            // Sonderregel: Wenn das untere Symbol === ist und === oben vorkommt
+            const bottomIsThreeLines = task.bottomShapes[0] === threeLinesSymbol;
+            const topHasThreeLines = task.topShapes.includes(threeLinesSymbol);
+            const threeLinesIndex = task.topShapes.indexOf(threeLinesSymbol);
+            const specialSymbolUnderThreeLines = threeLinesIndex === task.specialSymbolPosition;
+
+            if (bottomIsThreeLines && topHasThreeLines) {
+                if (specialSymbolUnderThreeLines) {
+                    correct = false;
+                } else {
+                    correct = true;
+                }
+            }
+
+            const userCorrect = (correct && userSaysYes) || (!correct && !userSaysYes);
+            const reactionTime = (endTime - startTime) / 1000;
+
+            // Feedback-Animation für die Antwort
+            const bottomShapeBox = document.querySelector('.bottom-shape');
+            if (userCorrect) {
+                bottomShapeBox.classList.add('correct');
+            } else {
+                bottomShapeBox.classList.add('incorrect');
+            }
+
+            results.push({ correct: userCorrect, reactionTime: reactionTime });
+
+            // Kurz warten, damit die Animation sichtbar ist, bevor die nächste Aufgabe angezeigt wird
+            setTimeout(nextTask, 300);
+        }
+
+        function showResults() {
+            const correctCount = results.filter(r => r.correct).length;
+            const correctPercent = (correctCount / tasks.length) * 100;
+
+            const avgTime = results.reduce((sum, r) => sum + r.reactionTime, 0) / tasks.length;
+
+            let baseRating = '';
+            if (correctPercent >= 90) baseRating = 'sehr gut';
+            else if (correctPercent >= 80) baseRating = 'gut';
+            else if (correctPercent >= 70) baseRating = 'befriedigend';
+            else if (correctPercent >= 60) baseRating = 'ausreichend';
+            else baseRating = 'nicht bestanden';
+
+            let timeOver = avgTime - 2.5;
+            let timePenaltyPercent = 0;
+            if (timeOver > 0) {
+                timePenaltyPercent = timeOver * 10;
+            }
+
+            const ratingMap = { 'sehr gut': 5, 'gut': 4, 'befriedigend': 3, 'ausreichend': 2, 'nicht bestanden': 1 };
+            let ratingValue = ratingMap[baseRating];
+            let stepsDown = Math.floor(timePenaltyPercent / 10);
+            ratingValue -= stepsDown;
+            if (ratingValue < 1) ratingValue = 1;
+
+            const finalRating = Object.keys(ratingMap).find(key => ratingMap[key] === ratingValue);
+
+            document.getElementById('result').textContent =
+                `Ergebnis: ${Math.round(correctPercent)}% richtig, Durchschnittszeit: ${avgTime.toFixed(2)} s, Bewertung: ${finalRating}`;
+
+            document.getElementById('yesButton').style.display = 'none';
+            document.getElementById('noButton').style.display = 'none';
+
+            const restartButton = document.getElementById('restartButton');
+            restartButton.style.display = 'inline-block';
+            restartButton.removeEventListener('click', restartTest);
+            restartButton.addEventListener('click', restartTest);
+        }
+
+        function restartTest() {
+            document.getElementById('testContainer').style.display = 'none';
+            document.getElementById('result').textContent = '';
+            document.getElementById('restartButton').style.display = 'none';
+
+            document.getElementById('yesButton').style.display = 'inline-block';
+            document.getElementById('noButton').style.display = 'inline-block';
+
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        document.getElementById('yesButton').addEventListener('click', () => evaluateAnswer(true));
+        document.getElementById('noButton').addEventListener('click', () => evaluateAnswer(false));
+    </script>
+</body>
+</html>
